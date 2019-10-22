@@ -1,0 +1,17 @@
+{
+  "name": "express接口",
+  "version": "1.0.0",
+  "description": "express应用",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon index"
+  },
+  "author": "陆飞",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "express": "^4.17.1",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^5.7.6"
+  }
+}
