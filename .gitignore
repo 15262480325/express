@@ -1,0 +1,32 @@
+bin
+target
+.svn
+
+#Eclipse project files
+.project
+.classpath
+.settings
+
+#IntelliJ IDEA project files and directories
+*.iml
+*.ipr
+*.iws
+.idea/
+
+#Build targets
+/target
+*/target
+
+#Mac-specific directory that no other operating system needs.
+.DS_Store
+/logs
+*.log
+*.log.*
+
+#NodeJs
+node_modules/
+spm_modules/
+
+#网站地图文件
+sitemap.xml
+/foundation-business/src/main/resources/dubbo.properties
