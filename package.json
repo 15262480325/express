@@ -1,7 +1,7 @@
 {
-  "name": "express接口",
+  "name": "express接口项目",
   "version": "1.0.0",
-  "description": "express应用",
+  "description": "express后台接口",
   "main": "index.js",
   "scripts": {
     "start": "nodemon index"
