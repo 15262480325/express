@@ -32,13 +32,12 @@ router.use((req, res, next) => {
     //如果不是登录或者注册页面都需要在请求时带上token
     if (req.url !== '/register' && req.url !== '/login') {
         //解析token
-        jwt.verify(req.headers.token,secret, (err, data) => {
-            console.log(err, data);
+        jwt.verify(req.headers.token, secret, (err, data) => {
             if (err)  return res.status(403).json({meg: '您已退出登录,请重新登录', success: false});
             //若果解析成功,去查去数据库看token里的用户信息是否存在
-            userModel.find(data, (err, res) => {
-                console.log(err, res)
-                if (err || res.length === 0) return res.status(403).json({meg: '无效的身份,请重新登录', success: false});
+            userModel.find({phone: data.phone, password: data.password}, (err, data) => {
+                console.log(data)
+                if (err || data.length === 0) return res.status(403).json({meg: '无效的身份,请重新登录', success: false});
                 next();
             })
         })
@@ -92,12 +91,7 @@ router.post('/login', (req, res) => {
         //根据手机号查找到用户密码然后比对看是否一致,密码一致就登录
         if (data.password !== req.body.password) return res.json({msg: '密码错误,请重试', success: false});
         //登录成功返回token
-        let token = jwt.sign({phone: data.phone, password: data.password}, 'secret', { expiresIn: '8h' });
-        jwt.verify(token, secret, function(err, result) {
-            console.log(err);
-            console.log(result)
-        });
-        return res.json({msg: '登录成功', success: true, data: token})
+        return res.json({msg: '登录成功', success: true, data: jwt.sign({phone: data.phone, password: data.password}, secret, { expiresIn: '8h' })})
     })
 })
 
