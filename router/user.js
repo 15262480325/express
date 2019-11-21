@@ -36,7 +36,6 @@ router.use((req, res, next) => {
             if (err)  return res.status(403).json({meg: '您已退出登录,请重新登录', success: false});
             //若果解析成功,去查去数据库看token里的用户信息是否存在
             userModel.find({phone: data.phone, password: data.password}, (err, data) => {
-                console.log(data)
                 if (err || data.length === 0) return res.status(403).json({meg: '无效的身份,请重新登录', success: false});
                 next();
             })
@@ -59,12 +58,12 @@ router.get('/find', (req, res) => {
 //用户注册
 router.post('/register', (req, res) => {
     //判断是否有手机号
-    if (!req.body.phone)  return res.json({meg: '手机号不能为空,请输入手机号', success: true});
+    if (!req.body.phone)  return res.json({meg: '手机号不能为空,请输入手机号', success: false});
     //判断是否有密码
-    if (!req.body.password) return res.json({msg: '密码不能为空,请输入密码', success: true});
+    if (!req.body.password) return res.json({msg: '密码不能为空,请输入密码', success: false});
     //更具手机号查询信息,判断此手机号是否被注册过
     userModel.find({phone: req.body.phone}, (err, data) => {
-        if (data.length > 0) return res.json({msg: '手机号已注册,请重试', success: true});
+        if (data.length > 0) return res.json({msg: '手机号已注册,请重试', success: false});
         let result = new userModel({
             phone: req.body.phone,
             password: req.body.password
@@ -82,16 +81,36 @@ router.post('/register', (req, res) => {
 //用户登录
 router.post('/login', (req, res) => {
     //判断是否有手机号
-    if (!req.body.phone)  return res.json({meg: '手机号不能为空,请输入手机号', success: true});
+    if (!req.body.phone)  return res.json({meg: '手机号不能为空,请输入手机号', success: false});
     //判断是否有密码
-    if (!req.body.password) return res.json({msg: '密码不能为空,请输入密码', success: true});
+    if (!req.body.password) return res.json({msg: '密码不能为空,请输入密码', success: false});
     //更具手机号去查找是有有此用户
     userModel.findOne({phone: req.body.phone}, (err, data) => {
-        if (Object.keys(data).length === 0) return res.json({msg: '没有此账号,请注册', success: false});
+        if (!data || Object.keys(data).length === 0) return res.json({msg: '没有此账号,请注册', success: false});
         //根据手机号查找到用户密码然后比对看是否一致,密码一致就登录
         if (data.password !== req.body.password) return res.json({msg: '密码错误,请重试', success: false});
         //登录成功返回token
         return res.json({msg: '登录成功', success: true, data: jwt.sign({phone: data.phone, password: data.password}, secret, { expiresIn: '8h' })})
+    })
+})
+
+//编辑用户信息
+router.post('/update', (req, res) => {
+    //判断是否有手机号
+    if (!req.body.phone)  return res.json({meg: '手机号不能为空,请传入手机号', success: false});
+    userModel.findOne({phone: req.body.phone}, (err, data) => {
+        if (!data || Object.keys(data).length === 0) return res.json({msg: '没有此用户,请重试', success: false});
+        //从用户提交的数据中提取出跟数据库字段值不相等的内容,然后更新
+        let update = {};
+        Object.keys(req.body).forEach(item => {
+            if (req.body[item] !== data[item]) {
+                update[item] = req.body[item];
+            }
+        });
+        userModel.findByIdAndUpdate(data._id, update, (error, result) => {
+            if (error) return res.status(500).json({msg: '系统错误,请稍后重试', success: false});
+            return res.json({msg: '更新成功', success: true})
+        })
     })
 })
 
